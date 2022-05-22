@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Josephat eze / Udacity - This template deploys VPC
+Description: 'Josephat eze / Udacity - This template deploys VPC'
 Resources:
   UdacityVPC:
     Type: 'AWS::EC2::VPC'
@@ -7,5 +7,5 @@ Resources:
       CidrBlock: 10.0.0.0/16
       EnableDnsHostnames: 'true'
       Tags:
-        -Key: name
-        Value: myfirstVPC
+        - Key: name
+          Value: myfirstVPC 
