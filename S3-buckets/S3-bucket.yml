@@ -1,0 +1,91 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+
+    EnvironmentName:
+        Description: An environment name that will be prefixed to resource names
+        Type: String
+
+Resources:
+    S3Bucket:
+      Type: 'AWS::S3::Bucket'
+      Properties:
+        AccessControl: PublicRead
+
+    BucketPolicy:
+      Type: 'AWS::S3::BucketPolicy'
+      Properties:
+        PolicyDocument:
+          Id: MyPolicy
+          Version: 2012-10-17
+          Statement:
+            - Sid: PublicReadForGetBucketObjects
+              Effect: Allow
+              Principal: 
+                  Service:
+                  - ec2.amazonaws.com
+              Action: 's3:GetObject'
+              Resource: !Join 
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref S3Bucket
+                  - /*
+        Bucket: !Ref S3Bucket
+   
+    IAMRole:
+      Type: 'AWS::IAM::Role'
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - ec2.amazonaws.com
+              Action:
+                - 'sts:AssumeRole'
+        Path: /
+        Policies:
+          - PolicyName: udagram-S3-policy
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action: "s3:*"
+                  Resource: !Join 
+                      - ''
+                      - - 'arn:aws:s3:::'
+                        - !Ref S3Bucket
+                        - /*
+    IAMInstanceProfile:
+      Type: 'AWS::IAM::InstanceProfile'
+      Properties:
+        Path: /
+        Roles:
+          - !Ref IAMRole
+
+
+Outputs:
+  WebsiteURL:
+    Value: !GetAtt 
+      - S3Bucket
+      - WebsiteURL
+    Description: URL for website hosted on S3
+    Export:
+      Name: !Sub ${EnvironmentName}-WebsiteURL
+
+  S3BucketSecureURL:
+    Value: !Join 
+      - ''
+      - - 'https://'
+        - !GetAtt 
+          - S3Bucket
+          - DomainName
+    Description: Name of S3 bucket to hold website content
+    Export:
+      Name: !Sub ${EnvironmentName}-S3BucketSecureURL
+
+  S3InstanceProfile:
+    Description: Instance profile to be used for associating to ec2
+    Value: !Ref IAMInstanceProfile
+    Export:
+          Name: !Sub ${EnvironmentName}-instanceprofile

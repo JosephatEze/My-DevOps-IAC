@@ -1,0 +1,6 @@
+	[
+    {
+        "ParameterKey": "EnvironmentName",
+        "ParameterValue": "udagram-S3-role"
+      }
+]
