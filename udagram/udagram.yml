@@ -277,6 +277,31 @@ Resources:
             ToPort: 65535
             CidrIp: 0.0.0.0/0
 
+    BastionHost:  
+      Type: AWS::EC2::Instance
+      Properties:  
+        AvailabilityZone:  !Select [ 0, !GetAZs '' ]
+        BlockDeviceMappings: 
+          - DeviceName: /dev/sda1
+            Ebs: 
+              VolumeSize: 8
+              VolumeType: gp2
+        ImageId:  ami-0022f774911c1d690 
+        InstanceType: t2.micro
+        KeyName: 
+            Ref: "JumpBoxKey"
+        NetworkInterfaces:  
+          - DeviceIndex: 0
+            AssociatePublicIpAddress: true
+            DeleteOnTermination: true
+            GroupSet: 
+              - Ref:  JumpBoxSecGroup
+            SubnetId: 
+              Ref: PublicSubnet1
+        Tags:  
+          - Key: Name
+            Value: jumpbox
+
     WebAppLaunchConfig:
         Type: AWS::AutoScaling::LaunchConfiguration
         Properties:
@@ -287,7 +312,7 @@ Resources:
                 apt-get install apache2 -y
                 systemctl start apache2.service  
                 cd /var/www/html        
-                echo "It works! Udacity project 2" >> index.html
+                echo "it works! Udagram, Udacity" >> index.html
           # ToDo: AMI ID of Ubuntu Linux machine. Too get one, try creating a VM from the web console. 
           ImageId: !Ref AMIidtoUse 
           # ToDo: Change the key-pair name, as applicable to you. 
@@ -362,11 +387,15 @@ Resources:
 
 Outputs: 
 
-    EnvironmentName:
-        Description: A reference to the created VPC
-        Value: !Ref EnvironmentName
+    loadbalancerurl:
+        Description: URL for my load balancer
+        Value: 
+           Fn::Join: 
+            - ""
+            - - 'http://'
+              - !GetAtt WebAppLB.DNSName
         Export:
-          Name: EnvironmentName
+          Name: !Sub ${EnvironmentName}-LBURL
 
     VPC: 
         Description: A reference to the created VPC
