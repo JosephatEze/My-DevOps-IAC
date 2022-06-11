@@ -287,7 +287,7 @@ Resources:
                 apt-get install apache2 -y
                 systemctl start apache2.service  
                 cd /var/www/html        
-                echo "It works! Udacity project 2" > index.html
+                echo "It works! Udacity project 2" >> index.html
           # ToDo: AMI ID of Ubuntu Linux machine. Too get one, try creating a VM from the web console. 
           ImageId: !Ref AMIidtoUse 
           # ToDo: Change the key-pair name, as applicable to you. 
